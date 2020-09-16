@@ -1,0 +1,30 @@
+#    Tupfile for the receiver
+#    Copyright (C) 2020  Luiz Henrique Laurini
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+include_rules
+
+export AVRCXX
+export AVRCXXFLAGS
+export AVRLDFLAGS
+export F_CPU
+AVRCXX=${AVRCXX:-avr-c++}
+F_CPU=${F_CPU:-8000000}
+AVRCXXFLAGS=${AVRCXXFLAGS} -mmcu=attiny85 -flto -g -O3 -Wall -Wextra -pedantic -DF_CPU=$(F_CPU)
+AVRLDFLAGS=${AVRLDFLAGS} -flto -g -O3
+
+: foreach *.cxx |> $(AVRCXX) $(AVRCXXFLAGS) -I. -I.. -c %f -o %o |> %B.o
+: ../RF24/RF24.cpp |> $(AVRCXX) $(AVRCXXFLAGS) -I. -c %f -o %o |> %B.o
+: *.o |> $(AVRCXX) $(AVRLDFLAGS) %f -o %o |> receiver.elf
