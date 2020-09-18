@@ -25,6 +25,10 @@ F_CPU=${F_CPU:-8000000}
 AVRCXXFLAGS=${AVRCXXFLAGS} -mmcu=attiny85 -flto -g -O3 -Wall -Wextra -pedantic -DF_CPU=$(F_CPU)
 AVRLDFLAGS=${AVRLDFLAGS} -flto -g -O3
 
-: foreach *.cxx |> $(AVRCXX) $(AVRCXXFLAGS) -I. -I.. -c %f -o %o |> %B.o
+ifeq (@(BUILD_RECEIVER),y)
+
+: foreach *.cxx | ../config.h |> $(AVRCXX) $(AVRCXXFLAGS) -I. -I.. -c %f -o %o |> %B.o
 : ../RF24/RF24.cpp |> $(AVRCXX) $(AVRCXXFLAGS) -I. -c %f -o %o |> %B.o
 : *.o |> $(AVRCXX) $(AVRLDFLAGS) %f -o %o |> receiver.elf
+
+endif

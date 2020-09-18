@@ -1,0 +1,7 @@
+#!/bin/sh
+set -e
+rm -rf build-*
+rm -rf configure-variants
+cp -r variants configure-variants
+sed -ri -e 's/(CONFIG_BUILD_TRANSMITTER)=y/\1=n/' configure-variants/*
+tup variant configure-variants/*

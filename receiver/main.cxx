@@ -16,6 +16,7 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include "../config.h"
 #include <RF24/RF24.h>
 
 constexpr uint16_t CE_PIN = 0;
@@ -25,7 +26,15 @@ __attribute__((externally_visible)) int main()
 {
 	RF24 rf24(CE_PIN, CSN_PIN);
 	rf24.begin();
-	rf24.openReadingPipe(0, 0x123456);
+	rf24.setAddressWidth(CONFIG_ADDRESS_WIDTH);
+	rf24.setRetries(CONFIG_RETRY_DELAY, CONFIG_RETRY_COUNT);
+	rf24.setChannel(CONFIG_CHANNEL);
+	rf24.setPayloadSize(CONFIG_PAYLOAD_SIZE);
+	rf24.setAutoAck(true);
+	rf24.setPALevel(CONFIG_POWER);
+	rf24.setDataRate(CONFIG_BITRATE);
+	rf24.setCRCLength(RF24_CRC_8);
+	rf24.openReadingPipe(0, CONFIG_ADDRESS);
 
 	while (true)
 	{
