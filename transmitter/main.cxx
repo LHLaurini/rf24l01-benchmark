@@ -103,7 +103,9 @@ int main()
 	for (auto &detail : details)
 	{
 		log << i++ << " " << std::chrono::duration_cast<std::chrono::nanoseconds>(detail.time - lastTime).count() << " "
-			<< detail.arc << "\n";
+			<< static_cast<unsigned int>(detail.arc) << "\n";
 		lastTime = detail.time;
 	}
+
+	return 0;
 }
