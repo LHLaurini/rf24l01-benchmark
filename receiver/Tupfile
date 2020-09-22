@@ -30,5 +30,7 @@ ifeq (@(BUILD_RECEIVER),y)
 : foreach *.cxx | ../config.h |> $(AVRCXX) $(AVRCXXFLAGS) -I. -I.. -c %f -o %o |> %B.o
 : ../RF24/RF24.cpp |> $(AVRCXX) $(AVRCXXFLAGS) -I. -c %f -o %o |> %B.o
 : *.o |> $(AVRCXX) $(AVRLDFLAGS) %f -o %o |> receiver.elf
+: receiver.elf |> avr-objcopy -O ihex -R .eeprom %f %o |> %B.hex
+: receiver.elf |> avr-objdump -S %f > %o |> %B.S
 
 endif
