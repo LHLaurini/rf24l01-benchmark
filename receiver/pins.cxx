@@ -23,6 +23,7 @@ void digitalWrite(int pin, bool value)
 	PORTB = (PORTB & ~(1 << pin)) | (value << pin);
 }
 
-/*void pinMode(int pin, int mode)
+void pinMode(int pin, bool output)
 {
-}*/
+	DDRB = (DDRB & ~(1 << pin)) | ((output ? 1 : 0) << pin);
+}

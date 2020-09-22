@@ -36,5 +36,5 @@ constexpr bool OUTPUT = true;
 void delayMicroseconds(int micro);
 void delay(int milli);
 void digitalWrite(int pin, bool value);
-void pinMode(int pin, int mode);
+void pinMode(int pin, bool output);
 int millis();

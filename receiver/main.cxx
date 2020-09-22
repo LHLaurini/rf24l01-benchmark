@@ -19,8 +19,8 @@
 #include "../config.h"
 #include <RF24/RF24.h>
 
-constexpr uint16_t CE_PIN = 0;
-constexpr uint16_t CSN_PIN = 0;
+constexpr uint16_t CE_PIN = CONFIG_RECEIVER_CE_PIN;
+constexpr uint16_t CSN_PIN = CONFIG_RECEIVER_CSN_PIN;
 
 __attribute__((externally_visible)) int main()
 {
