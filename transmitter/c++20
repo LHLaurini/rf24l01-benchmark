@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+CXX_=${CXX:-c++}
+FLAGS="-std=c++20 -std=c++2a"
+
+for flag in ${FLAGS}; do
+    if ${CXX_} -c ${flag} -xc++ /dev/null -o /dev/null 2> /dev/null; then
+        echo ${flag}
+        exit 0
+    fi
+done
+
+echo "Error: ${CXX_} doesn't support C++20." >& 2
+exit 1
