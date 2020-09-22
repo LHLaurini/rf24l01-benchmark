@@ -24,8 +24,8 @@ export RF24LIBS
 CXX=${CXX:-c++}
 RF24CXXFLAGS=${RF24CXXFLAGS}
 RF24LIBS=${RF24LIBS:--lrf24}
-CXXFLAGS=${CXXFLAGS} $(RF24CXXFLAGS) \$(./c++20) -flto -g -O3 -Wall -Wextra -pedantic
-LDFLAGS=${LDFLAGS} $(RF24LIBS) \$(./c++20) -flto -g -O3 -pthread
+CXXFLAGS=${CXXFLAGS} $(RF24CXXFLAGS) \$(./c++20) -g -O3 -Wall -Wextra -pedantic
+LDFLAGS=${LDFLAGS} $(RF24LIBS) \$(./c++20) -g -O3 -pthread
 
 ifeq (@(BUILD_TRANSMITTER),y)
 
