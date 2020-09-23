@@ -45,7 +45,7 @@ struct PayloadDetails
 	std::uint8_t arc;
 };
 
-int main()
+int pmain()
 {
 	std::random_device device;
 	std::mt19937_64 engine(device());
@@ -135,4 +135,22 @@ int main()
 	}
 
 	return 0;
+}
+
+int main()
+{
+	try
+	{
+		return pmain();
+	}
+	catch (const std::exception &e)
+	{
+		std::cout << "Exception: " << e.what() << std::endl;
+		return 1;
+	}
+	catch (...)
+	{
+		std::cout << "Exception: unknown" << std::endl;
+		return 1;
+	}
 }
