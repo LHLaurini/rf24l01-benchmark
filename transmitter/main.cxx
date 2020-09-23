@@ -70,6 +70,7 @@ int main()
 	rf24.setDataRate(CONFIG_BITRATE);
 	rf24.setCRCLength(RF24_CRC_8);
 	rf24.openWritingPipe(CONFIG_ADDRESS);
+	rf24.stopListening();
 
 	{
 		std::cout << "Checking if receiver is reachable..." << std::endl;
