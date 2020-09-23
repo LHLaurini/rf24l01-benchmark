@@ -76,17 +76,24 @@ int main()
 		std::cout << "Checking if receiver is reachable..." << std::endl;
 		std::array<char, CONFIG_PAYLOAD_SIZE> whatever;
 
-		for (auto i = 0; i < 10; i++)
+		int i;
+		for (i = 0; i < 10; i++)
 		{
 			if (rf24.write(whatever.data(), whatever.size()))
 			{
 				std::cout << "OK! Starting test." << std::endl;
+				break;
 			}
 			else
 			{
 				std::cout << "Failed. Trying again..." << std::endl;
 				std::this_thread::sleep_for(1s);
 			}
+		}
+
+		if (i == 10)
+		{
+			return 1;
 		}
 	}
 
