@@ -23,7 +23,7 @@ export F_CPU
 AVRCXX=${AVRCXX:-avr-c++}
 F_CPU=${F_CPU:-8000000}
 AVRCXXFLAGS=${AVRCXXFLAGS} -mmcu=attiny85 -flto -g -O3 -Wall -Wextra -pedantic -DF_CPU=$(F_CPU)
-AVRLDFLAGS=${AVRLDFLAGS} -flto -g -O3
+AVRLDFLAGS=${AVRLDFLAGS} -mmcu=attiny85 -flto -g -O3
 
 ifeq (@(BUILD_RECEIVER),y)
 

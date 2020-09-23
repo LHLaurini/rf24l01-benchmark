@@ -22,7 +22,7 @@
 constexpr uint16_t CE_PIN = CONFIG_RECEIVER_CE_PIN;
 constexpr uint16_t CSN_PIN = CONFIG_RECEIVER_CSN_PIN;
 
-__attribute__((externally_visible)) int main()
+int main()
 {
 	RF24 rf24(CE_PIN, CSN_PIN);
 	rf24.begin();
