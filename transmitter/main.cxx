@@ -98,11 +98,24 @@ int pmain()
 	}
 
 	std::atomic_flag running;
+	std::atomic_flag noError;
 	running.test_and_set();
+	noError.test_and_set();
 
 	std::thread helper([&]() {
-		std::this_thread::sleep_for(TARGET_TIME);
-		running.clear();
+		auto stopTime = std::chrono::steady_clock::now() + TARGET_TIME;
+		while (noError.test_and_set())
+		{
+			auto now = std::chrono::steady_clock::now();
+
+			if (now > stopTime)
+			{
+				running.clear();
+				break;
+			}
+
+			std::this_thread::sleep_for(1s);
+		}
 	});
 
 	auto randomBytes = std::as_bytes(std::span(randomData));
@@ -114,6 +127,7 @@ int pmain()
 		if (!rf24.writeBlocking(randomBytes.subspan(i).data(), CONFIG_PAYLOAD_SIZE, 10000))
 		{
 			failed = true;
+			noError.clear();
 			break;
 		}
 
@@ -133,6 +147,8 @@ int pmain()
 			<< static_cast<unsigned int>(detail.arc) << "\n";
 		lastTime = detail.time;
 	}
+
+	helper.join();
 
 	return 0;
 }
