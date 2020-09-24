@@ -35,12 +35,13 @@ int main()
 	rf24.setDataRate(CONFIG_BITRATE);
 	rf24.setCRCLength(RF24_CRC_8);
 	rf24.openReadingPipe(0, CONFIG_ADDRESS);
+	rf24.startListening();
 
 	while (true)
 	{
 		if (rf24.available())
 		{
-			static uint8_t buffer[32];
+			static uint8_t buffer[CONFIG_PAYLOAD_SIZE];
 			rf24.read(buffer, sizeof(buffer));
 		}
 	}
