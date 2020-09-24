@@ -131,6 +131,7 @@ int pmain()
 		}
 
 		details.emplace_back(std::chrono::high_resolution_clock::now(), rf24.getARC());
+		std::this_thread::sleep_for(CONFIG_DELAYMS);
 	}
 
 	std::cout << "failed = " << std::boolalpha << failed << "\n";
