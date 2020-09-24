@@ -37,11 +37,12 @@ constexpr auto RANDOM_BUFFER_SIZE = 2 * TARGET_TIME_SECS * 250000 / sizeof(std::
 
 struct PayloadDetails
 {
-	PayloadDetails(auto time, auto arc) : time(time), arc(arc)
+	PayloadDetails(auto ok, auto time, auto retries) : ok(ok), time(time), retries(retries)
 	{
 	}
+	bool ok;
 	std::chrono::high_resolution_clock::time_point time;
-	std::uint8_t arc;
+	unsigned retries;
 };
 
 int pmain()
@@ -96,58 +97,82 @@ int pmain()
 		}
 	}
 
-	std::atomic_flag running;
-	std::atomic_flag noError;
-	running.test_and_set();
-	noError.test_and_set();
+	auto stopTime = std::chrono::steady_clock::now() + TARGET_TIME;
 
-	std::thread helper([&]() {
-		auto stopTime = std::chrono::steady_clock::now() + TARGET_TIME;
-		while (noError.test_and_set())
-		{
-			auto now = std::chrono::steady_clock::now();
-
-			if (now > stopTime)
-			{
-				running.clear();
-				break;
-			}
-
-			std::this_thread::sleep_for(1s);
-		}
-	});
+	auto notFinished = [&]() -> bool { return std::chrono::steady_clock::now() > stopTime; };
 
 	auto randomBytes = std::as_bytes(std::span(randomData));
-	bool failed = false;
 	std::vector<PayloadDetails> details;
 
-	for (auto i = 0ULL; running.test_and_set(); i += CONFIG_PAYLOAD_SIZE)
 	{
-		if (!rf24.writeBlocking(randomBytes.subspan(i).data(), CONFIG_PAYLOAD_SIZE, 10000))
+		unsigned long i;
+
+		if constexpr (CONFIG_DELAYMS > 0)
 		{
-			failed = true;
-			noError.clear();
-			break;
+			for (i = 0; notFinished(); i += CONFIG_PAYLOAD_SIZE)
+			{
+				unsigned retries = 0;
+				auto data = randomBytes.subspan(i, CONFIG_PAYLOAD_SIZE);
+
+				while (notFinished())
+				{
+					if (rf24.write(data.data(), data.size()))
+					{
+						break;
+					}
+					else
+					{
+						retries += CONFIG_RETRY_COUNT;
+					}
+				}
+
+				details.emplace_back(true, std::chrono::high_resolution_clock::now(), retries + rf24.getARC());
+				std::this_thread::sleep_for(std::chrono::milliseconds(CONFIG_DELAYMS));
+			}
+		}
+		else
+		{
+			for (i = 0; notFinished(); i += CONFIG_PAYLOAD_SIZE * 3)
+			{
+				auto data = randomBytes.subspan(i, CONFIG_PAYLOAD_SIZE * 3);
+
+				auto data1 = data.subspan(0 * CONFIG_PAYLOAD_SIZE, CONFIG_PAYLOAD_SIZE);
+				auto data2 = data.subspan(1 * CONFIG_PAYLOAD_SIZE, CONFIG_PAYLOAD_SIZE);
+				auto data3 = data.subspan(2 * CONFIG_PAYLOAD_SIZE, CONFIG_PAYLOAD_SIZE);
+
+				rf24.writeFast(data1.data(), data1.size());
+				rf24.writeFast(data2.data(), data2.size());
+				rf24.writeFast(data3.data(), data3.size());
+
+				unsigned retries;
+				bool ok = rf24.txStandBy();
+				if (ok)
+				{
+					retries = rf24.getARC();
+				}
+				else
+				{
+					retries = CONFIG_RETRY_COUNT;
+				}
+
+				// Info is about 3 payloads, in this case
+				details.emplace_back(ok, std::chrono::high_resolution_clock::now(), retries);
+			}
 		}
 
-		details.emplace_back(std::chrono::high_resolution_clock::now(), rf24.getARC());
-		std::this_thread::sleep_for(std::chrono::milliseconds(CONFIG_DELAYMS));
+		std::cout << "sent ~" << i << "/" << randomBytes.size() << " bytes\n";
 	}
-
-	std::cout << "failed = " << std::boolalpha << failed << "\n";
-	std::cout << "sent ~" << details.size() << "/" << randomBytes.size() << " bytes\n";
 
 	auto lastTime = details.at(0).time;
 
 	auto i = 0ULL;
 	for (auto &detail : details)
 	{
-		std::cout << i++ << " " << std::chrono::duration_cast<std::chrono::nanoseconds>(detail.time - lastTime).count()
-				  << " " << static_cast<unsigned int>(detail.arc) << "\n";
+		std::cout << i++ << " " << std::boolalpha << detail.ok << " "
+				  << std::chrono::duration_cast<std::chrono::nanoseconds>(detail.time - lastTime).count() << " "
+				  << detail.retries << "\n";
 		lastTime = detail.time;
 	}
-
-	helper.join();
 
 	return 0;
 }
