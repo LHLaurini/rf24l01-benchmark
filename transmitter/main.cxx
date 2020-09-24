@@ -22,7 +22,6 @@
 #include <array>
 #include <atomic>
 #include <chrono>
-#include <fstream>
 #include <iostream>
 #include <random>
 #include <span>
@@ -73,7 +72,7 @@ int pmain()
 	rf24.stopListening();
 
 	{
-		std::cout << "Checking if receiver is reachable..." << std::endl;
+		std::clog << "Checking if receiver is reachable..." << std::endl;
 		std::array<char, CONFIG_PAYLOAD_SIZE> whatever;
 
 		int i;
@@ -81,12 +80,12 @@ int pmain()
 		{
 			if (rf24.write(whatever.data(), whatever.size()))
 			{
-				std::cout << "OK! Starting test." << std::endl;
+				std::clog << "OK! Starting test." << std::endl;
 				break;
 			}
 			else
 			{
-				std::cout << "Failed. Trying again..." << std::endl;
+				std::clog << "Failed. Trying again..." << std::endl;
 				std::this_thread::sleep_for(1s);
 			}
 		}
@@ -134,17 +133,16 @@ int pmain()
 		details.emplace_back(std::chrono::high_resolution_clock::now(), rf24.getARC());
 	}
 
-	std::ofstream log(std::to_string(distribution(engine)) + ".log");
-	log << "failed = " << std::boolalpha << failed << "\n";
-	log << "sent ~" << details.size() << "/" << randomBytes.size() << " bytes\n";
+	std::cout << "failed = " << std::boolalpha << failed << "\n";
+	std::cout << "sent ~" << details.size() << "/" << randomBytes.size() << " bytes\n";
 
 	auto lastTime = details.at(0).time;
 
 	auto i = 0ULL;
 	for (auto &detail : details)
 	{
-		log << i++ << " " << std::chrono::duration_cast<std::chrono::nanoseconds>(detail.time - lastTime).count() << " "
-			<< static_cast<unsigned int>(detail.arc) << "\n";
+		std::cout << i++ << " " << std::chrono::duration_cast<std::chrono::nanoseconds>(detail.time - lastTime).count()
+				  << " " << static_cast<unsigned int>(detail.arc) << "\n";
 		lastTime = detail.time;
 	}
 
@@ -161,12 +159,12 @@ int main()
 	}
 	catch (const std::exception &e)
 	{
-		std::cout << "Exception: " << e.what() << std::endl;
+		std::cerr << "Exception: " << e.what() << std::endl;
 		return 1;
 	}
 	catch (...)
 	{
-		std::cout << "Exception: unknown" << std::endl;
+		std::cerr << "Exception: unknown" << std::endl;
 		return 1;
 	}
 }
