@@ -58,7 +58,7 @@ int pmain(int argc, char *argv[])
 	{
 		std::cout << i++ << " " << std::boolalpha << detail.ok << " "
 				  << std::chrono::duration_cast<std::chrono::nanoseconds>(detail.time - lastTime).count() << " "
-				  << detail.retries << "\n";
+				  << detail.retries << " " << detail.txDs << " " << detail.maxRt << "\n";
 		lastTime = detail.time;
 	}
 

@@ -240,7 +240,10 @@ std::vector<PayloadDetails> Benchmark::run(int testNum)
 				}
 			}
 
-			details.emplace_back(true, std::chrono::high_resolution_clock::now(), retries + rf24.getARC());
+			bool txDs, maxRt, _;
+			rf24.whatHappened(txDs, maxRt, _);
+
+			details.emplace_back(true, std::chrono::high_resolution_clock::now(), retries + rf24.getARC(), txDs, maxRt);
 			std::this_thread::sleep_for(std::chrono::milliseconds(currentConfig.delayms));
 		}
 	}
@@ -251,7 +254,11 @@ std::vector<PayloadDetails> Benchmark::run(int testNum)
 			auto data = randomBytes.subspan(i, currentConfig.payloadSize);
 			bool ok = rf24.writeFast(data.data(), data.size());
 			unsigned retries = rf24.getARC();
-			details.emplace_back(ok, std::chrono::high_resolution_clock::now(), retries);
+
+			bool txDs, maxRt, _;
+			rf24.whatHappened(txDs, maxRt, _);
+
+			details.emplace_back(ok, std::chrono::high_resolution_clock::now(), retries, txDs, maxRt);
 		}
 
 		rf24.txStandBy();

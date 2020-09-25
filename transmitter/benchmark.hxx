@@ -28,12 +28,15 @@ struct ConfigPayload;
 
 struct PayloadDetails
 {
-	PayloadDetails(auto ok, auto time, auto retries) : ok(ok), time(time), retries(retries)
+	PayloadDetails(auto ok, auto time, auto retries, auto txDs, auto maxRt)
+		: ok(ok), time(time), retries(retries), txDs(txDs), maxRt(maxRt)
 	{
 	}
 	bool ok;
 	std::chrono::high_resolution_clock::time_point time;
 	unsigned retries;
+	bool txDs;
+	bool maxRt;
 };
 
 struct Config
