@@ -55,6 +55,8 @@ int main()
 			rf24.setPayloadSize(payloadSize);
 			rf24.setPALevel(static_cast<rf24_pa_dbm_e>(config.power));
 			rf24.setDataRate(static_cast<rf24_datarate_e>(config.bitrate));
+
+			rf24.openReadingPipe(0, CONFIG_ADDRESS);
 			break;
 		}
 	}

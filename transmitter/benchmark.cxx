@@ -57,7 +57,6 @@ void Benchmark::initializeRF24()
 
 	configureTransmitter(0);
 
-	rf24.openWritingPipe(CONFIG_ADDRESS);
 	rf24.stopListening();
 }
 
@@ -108,6 +107,8 @@ void Benchmark::configureTransmitter(int config)
 	rf24.setPayloadSize(currentConfig.payloadSize);
 	rf24.setPALevel(static_cast<rf24_pa_dbm_e>(currentConfig.power));
 	rf24.setDataRate(static_cast<rf24_datarate_e>(currentConfig.bitrate));
+
+	rf24.openWritingPipe(CONFIG_ADDRESS);
 
 	if (config != 0)
 	{
