@@ -110,6 +110,8 @@ void Benchmark::configureTransmitter(int config)
 
 	rf24.openWritingPipe(CONFIG_ADDRESS);
 
+	std::this_thread::sleep_for(1s);
+
 	if (config != 0)
 	{
 		std::vector<char> whatever(currentConfig.payloadSize);
