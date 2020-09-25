@@ -102,6 +102,8 @@ void Benchmark::configureReceiver(int testNum)
 
 void Benchmark::configureTransmitter(int config)
 {
+	log("Configuring transmitter...");
+
 	currentConfig = configFromIndex(config);
 
 	ConfigPayload configPayload = generateConfigPayload(currentConfig);
@@ -127,6 +129,7 @@ void Benchmark::configureTransmitter(int config)
 			else
 			{
 				log("Failed. Trying again...");
+				std::this_thread::sleep_for(1s);
 			}
 		}
 
