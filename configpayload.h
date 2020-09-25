@@ -23,12 +23,12 @@
 // Hope this doesn't explode
 struct __attribute__((packed)) ConfigPayload
 {
-	unsigned delayms : 15;
 	unsigned payloadSize : 5;
 	rf24_datarate_e bitrate : 2;
 	rf24_pa_dbm_e power : 2;
 	unsigned retryDelay : 4;
 	unsigned retryCount : 4;
+	unsigned padding : 7;
 };
 
-static_assert(sizeof(ConfigPayload) == 4, "unexpected ConfigPayload size");
+static_assert(sizeof(ConfigPayload) == 3, "unexpected ConfigPayload size");
