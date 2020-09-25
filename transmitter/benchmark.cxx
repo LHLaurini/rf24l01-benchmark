@@ -148,7 +148,7 @@ void Benchmark::configureTransmitter(int config)
 	config.retryDelay = CONFIG_##x##_RETRY_DELAY;                                                                      \
 	config.retryCount = CONFIG_##x##_RETRY_COUNT
 
-Benchmark::Config Benchmark::configFromIndex(int configIndex)
+Config Benchmark::configFromIndex(int configIndex)
 {
 	Config config;
 

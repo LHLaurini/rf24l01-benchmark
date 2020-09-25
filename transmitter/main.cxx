@@ -36,6 +36,18 @@ int pmain(int argc, char *argv[])
 		return 1;
 	}
 
+	{
+		Config config = Benchmark::configFromIndex(testNum);
+
+		std::cout << "Test #" << testNum << ":" << std::endl;
+		std::cout << "delayms     = " << config.delayms << std::endl;
+		std::cout << "payloadSize = " << config.payloadSize << std::endl;
+		std::cout << "bitrate     = " << config.bitrate << std::endl;
+		std::cout << "power       = " << config.power << std::endl;
+		std::cout << "retryDelay  = " << config.retryDelay << std::endl;
+		std::cout << "retryCount  = " << config.retryCount << std::endl;
+	}
+
 	Benchmark bench([](const std::string &msg) { std::clog << msg << std::endl; });
 	std::vector<PayloadDetails> details = bench.run(testNum);
 
