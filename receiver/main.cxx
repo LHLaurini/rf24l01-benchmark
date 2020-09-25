@@ -55,6 +55,7 @@ int main()
 			rf24.setPayloadSize(payloadSize);
 			rf24.setPALevel(config.power);
 			rf24.setDataRate(config.bitrate);
+			break;
 		}
 	}
 
