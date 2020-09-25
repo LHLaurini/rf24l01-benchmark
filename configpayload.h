@@ -30,3 +30,5 @@ struct ConfigPayload
 	uint8_t retryDelay;
 	uint8_t retryCount;
 };
+
+static_assert(sizeof(ConfigPayload) == 5, "unexpected sizeof(ConfigPayload)");

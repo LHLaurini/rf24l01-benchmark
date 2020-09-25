@@ -104,12 +104,10 @@ void Benchmark::configureTransmitter(int config)
 	log("Configuring transmitter...");
 
 	currentConfig = configFromIndex(config);
-
-	ConfigPayload configPayload = generateConfigPayload(currentConfig);
-	rf24.setRetries(configPayload.retryDelay, configPayload.retryCount);
-	rf24.setPayloadSize(configPayload.payloadSize);
-	rf24.setPALevel(static_cast<rf24_pa_dbm_e>(configPayload.power));
-	rf24.setDataRate(static_cast<rf24_datarate_e>(configPayload.bitrate));
+	rf24.setRetries(currentConfig.retryDelay, currentConfig.retryCount);
+	rf24.setPayloadSize(currentConfig.payloadSize);
+	rf24.setPALevel(static_cast<rf24_pa_dbm_e>(currentConfig.power));
+	rf24.setDataRate(static_cast<rf24_datarate_e>(currentConfig.bitrate));
 
 	if (config != 0)
 	{
