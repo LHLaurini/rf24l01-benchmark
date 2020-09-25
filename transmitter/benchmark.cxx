@@ -110,27 +110,30 @@ void Benchmark::configureTransmitter(int config)
 	rf24.setPALevel(configPayload.power);
 	rf24.setDataRate(configPayload.bitrate);
 
-	std::vector<char> whatever(currentConfig.payloadSize);
-
-	log("Confirming receiver is accesssible...");
-
-	int i;
-	for (i = 0; i < 10; i++)
+	if (config != 0)
 	{
-		if (rf24.write(whatever.data(), whatever.size()))
-		{
-			log("OK.");
-			break;
-		}
-		else
-		{
-			log("Failed. Trying again...");
-		}
-	}
+		std::vector<char> whatever(currentConfig.payloadSize);
 
-	if (i == 10)
-	{
-		throw std::runtime_error("failed to reach receiver");
+		log("Confirming receiver is accesssible...");
+
+		int i;
+		for (i = 0; i < 10; i++)
+		{
+			if (rf24.write(whatever.data(), whatever.size()))
+			{
+				log("OK.");
+				break;
+			}
+			else
+			{
+				log("Failed. Trying again...");
+			}
+		}
+
+		if (i == 10)
+		{
+			throw std::runtime_error("failed to reach receiver");
+		}
 	}
 }
 
