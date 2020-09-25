@@ -219,11 +219,11 @@ std::vector<PayloadDetails> Benchmark::run(int testNum)
 	auto randomBytes = std::as_bytes(std::span(randomData));
 	details.clear();
 
-	unsigned long i;
+	unsigned long i, j;
 
 	if (currentConfig.delayms > 0)
 	{
-		for (i = 0; notFinished(); i += currentConfig.payloadSize)
+		for (i = 0, j = 0; notFinished(); i += currentConfig.payloadSize, j++)
 		{
 			unsigned retries = 0;
 			auto data = randomBytes.subspan(i, currentConfig.payloadSize);
@@ -246,16 +246,22 @@ std::vector<PayloadDetails> Benchmark::run(int testNum)
 	}
 	else
 	{
-		for (i = 0; notFinished(); i += currentConfig.payloadSize)
+		for (i = 0, j = 0; notFinished(); i += currentConfig.payloadSize, j++)
 		{
 			auto data = randomBytes.subspan(i, currentConfig.payloadSize);
 			bool ok = rf24.writeFast(data.data(), data.size());
 			unsigned retries = rf24.getARC();
 			details.emplace_back(ok, std::chrono::high_resolution_clock::now(), retries);
-		}
 
-		rf24.txStandBy();
+			if (j % 32 == 31)
+			{
+				rf24.txStandBy();
+				std::this_thread::sleep_for(100us);
+			}
+		}
 	}
+
+	rf24.txStandBy();
 
 	dataSent = i;
 
