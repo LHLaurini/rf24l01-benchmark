@@ -214,7 +214,7 @@ std::vector<PayloadDetails> Benchmark::run(int testNum)
 
 	auto stopTime = std::chrono::steady_clock::now() + TARGET_TIME;
 
-	auto notFinished = [&]() -> bool { return std::chrono::steady_clock::now() > stopTime; };
+	auto notFinished = [&]() -> bool { return std::chrono::steady_clock::now() < stopTime; };
 
 	auto randomBytes = std::as_bytes(std::span(randomData));
 	details.clear();
