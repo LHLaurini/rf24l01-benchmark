@@ -114,7 +114,7 @@ void Benchmark::configureTransmitter(int config)
 	{
 		std::vector<char> whatever(currentConfig.payloadSize);
 
-		log("Confirming receiver is accesssible...");
+		log("Confirming receiver is accessible...");
 
 		int i;
 		for (i = 0; i < 10; i++)
