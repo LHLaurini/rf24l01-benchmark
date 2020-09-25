@@ -18,13 +18,13 @@
 
 #pragma once
 
-#include "../configpayload.h"
-
 #include <RF24/RF24.h>
 #include <chrono>
 #include <functional>
 #include <string>
 #include <vector>
+
+struct ConfigPayload;
 
 struct PayloadDetails
 {

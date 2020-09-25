@@ -20,15 +20,13 @@
 
 #include <RF24/RF24.h>
 
-// Hope this doesn't explode
-struct __attribute__((packed)) ConfigPayload
+// Not worth the hassle to make a bit field (3 vs 5 bytes)
+// Also, bit field seemed inconsistent between ARM Clang and AVR GCC
+struct ConfigPayload
 {
-	unsigned payloadSize : 5;
-	rf24_datarate_e bitrate : 2;
-	rf24_pa_dbm_e power : 2;
-	unsigned retryDelay : 4;
-	unsigned retryCount : 4;
-	unsigned padding : 7;
+	uint8_t payloadSize;
+	uint8_t bitrate;
+	uint8_t power;
+	uint8_t retryDelay;
+	uint8_t retryCount;
 };
-
-static_assert(sizeof(ConfigPayload) == 3, "unexpected ConfigPayload size");

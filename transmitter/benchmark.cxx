@@ -18,7 +18,6 @@
 
 #include "benchmark.hxx"
 #include "../config.h"
-
 #include "../configpayload.h"
 
 #include <random>
@@ -109,8 +108,8 @@ void Benchmark::configureTransmitter(int config)
 	ConfigPayload configPayload = generateConfigPayload(currentConfig);
 	rf24.setRetries(configPayload.retryDelay, configPayload.retryCount);
 	rf24.setPayloadSize(configPayload.payloadSize);
-	rf24.setPALevel(configPayload.power);
-	rf24.setDataRate(configPayload.bitrate);
+	rf24.setPALevel(static_cast<rf24_pa_dbm_e>(configPayload.power));
+	rf24.setDataRate(static_cast<rf24_datarate_e>(configPayload.bitrate));
 
 	if (config != 0)
 	{
