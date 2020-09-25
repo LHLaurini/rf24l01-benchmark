@@ -186,7 +186,7 @@ Config Benchmark::configFromIndex(int configIndex)
 ConfigPayload Benchmark::generateConfigPayload(const Config &config)
 {
 	ConfigPayload configPayload;
-	configPayload.payloadSize = config.payloadSize - 1;
+	configPayload.payloadSize = config.payloadSize;
 	configPayload.bitrate = config.bitrate;
 	configPayload.power = config.power;
 	configPayload.retryDelay = config.retryDelay;

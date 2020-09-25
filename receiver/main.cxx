@@ -49,7 +49,7 @@ int main()
 			ConfigPayload config;
 			rf24.read(&config, sizeof config);
 
-			payloadSize = config.payloadSize + 1;
+			payloadSize = config.payloadSize;
 
 			rf24.setRetries(config.retryDelay, config.retryCount);
 			rf24.setPayloadSize(payloadSize);
