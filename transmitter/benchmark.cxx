@@ -246,32 +246,15 @@ std::vector<PayloadDetails> Benchmark::run(int testNum)
 	}
 	else
 	{
-		for (i = 0; notFinished(); i += currentConfig.payloadSize * 3)
+		for (i = 0; notFinished(); i += currentConfig.payloadSize)
 		{
-			auto data = randomBytes.subspan(i, currentConfig.payloadSize * 3);
-
-			auto data1 = data.subspan(0 * currentConfig.payloadSize, currentConfig.payloadSize);
-			auto data2 = data.subspan(1 * currentConfig.payloadSize, currentConfig.payloadSize);
-			auto data3 = data.subspan(2 * currentConfig.payloadSize, currentConfig.payloadSize);
-
-			rf24.writeFast(data1.data(), data1.size());
-			rf24.writeFast(data2.data(), data2.size());
-			rf24.writeFast(data3.data(), data3.size());
-
-			unsigned retries;
-			bool ok = rf24.txStandBy();
-			if (ok)
-			{
-				retries = rf24.getARC();
-			}
-			else
-			{
-				retries = currentConfig.retryCount;
-			}
-
-			// Info is about 3 payloads, in this case
+			auto data = randomBytes.subspan(i, currentConfig.payloadSize);
+			bool ok = rf24.writeFast(data.data(), data.size());
+			unsigned retries = rf24.getARC();
 			details.emplace_back(ok, std::chrono::high_resolution_clock::now(), retries);
 		}
+
+		rf24.txStandBy();
 	}
 
 	dataSent = i;
