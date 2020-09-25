@@ -256,7 +256,7 @@ std::vector<PayloadDetails> Benchmark::run(int testNum)
 			if (j % 32 == 31)
 			{
 				rf24.txStandBy();
-				std::this_thread::sleep_for(100us);
+				std::this_thread::sleep_for(10ms);
 			}
 		}
 	}
