@@ -20,10 +20,24 @@
 
 #include <iostream>
 
-int pmain()
+int pmain(int argc, char *argv[])
 {
+	if (argc != 2)
+	{
+		std::cerr << "Usage: " << argv[0] << " [test]" << std::endl;
+		return 1;
+	}
+
+	int testNum = std::stoi(argv[1]);
+
+	if (testNum < 1 || testNum > 4)
+	{
+		std::cerr << "Test number not in range [1-4]" << std::endl;
+		return 1;
+	}
+
 	Benchmark bench([](const std::string &msg) { std::clog << msg << std::endl; });
-	std::vector<PayloadDetails> details = bench.run();
+	std::vector<PayloadDetails> details = bench.run(testNum);
 
 	auto lastTime = details.at(0).time;
 
@@ -39,20 +53,20 @@ int pmain()
 	return 0;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
 	try
 	{
-		return pmain();
+		return pmain(argc, argv);
 	}
 	catch (const std::exception &e)
 	{
-		std::cerr << "Exception: " << e.what() << std::endl;
+		std::cerr << "Error: " << e.what() << std::endl;
 		return 1;
 	}
 	catch (...)
 	{
-		std::cerr << "Exception: unknown" << std::endl;
+		std::cerr << "Error: unhandled exception" << std::endl;
 		return 1;
 	}
 }

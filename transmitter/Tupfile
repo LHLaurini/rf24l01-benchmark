@@ -27,9 +27,5 @@ RF24LIBS=${RF24LIBS:--lrf24}
 CXXFLAGS=${CXXFLAGS} $(RF24CXXFLAGS) \$(./c++20) -g -O3 -Wall -Wextra -pedantic
 LDFLAGS=${LDFLAGS} $(RF24LIBS) \$(./c++20) -g -O3 -pthread
 
-ifeq (@(BUILD_TRANSMITTER),y)
-
 : foreach *.cxx | ../config.h |> $(CXX) $(CXXFLAGS) -c %f -o %o |> %B.o
 : *.o |> $(CXX) $(LDFLAGS) %f -o %o |> transmitter
-
-endif

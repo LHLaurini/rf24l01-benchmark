@@ -5,3 +5,4 @@ build-*/
 ##### Do not edit.
 .tup
 /.gitignore
+/config.h

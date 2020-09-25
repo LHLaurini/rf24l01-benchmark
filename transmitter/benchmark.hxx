@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include "../configpayload.h"
+
 #include <RF24/RF24.h>
 #include <chrono>
 #include <functional>
@@ -41,18 +43,34 @@ class Benchmark
 
 	Benchmark();
 	Benchmark(LogFn logFn);
-	std::vector<PayloadDetails> run();
+	std::vector<PayloadDetails> run(int testNum);
 	unsigned getDataSent() const;
 
 	LogFn logFn;
 
   private:
+	struct Config;
+
 	void initializeRF24();
 	std::vector<std::uint64_t> generateRandomData() const;
-	void configureReceiver();
+	void configureReceiver(int config);
+	void configureTransmitter(int config);
+	static ConfigPayload generateConfigPayload(const Config &config);
+	static Config configFromIndex(int config);
 	void log(const std::string &msg) const;
+
+	struct Config
+	{
+		unsigned delayms;
+		unsigned payloadSize;
+		rf24_datarate_e bitrate;
+		rf24_pa_dbm_e power;
+		unsigned retryDelay;
+		unsigned retryCount;
+	};
 
 	RF24 rf24;
 	std::vector<std::uint64_t> randomData;
 	unsigned dataSent;
+	Config currentConfig;
 };

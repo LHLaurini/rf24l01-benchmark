@@ -19,6 +19,8 @@
 #include "benchmark.hxx"
 #include "../config.h"
 
+#include "../configpayload.h"
+
 #include <random>
 #include <span>
 #include <thread>
@@ -50,13 +52,12 @@ void Benchmark::initializeRF24()
 	}
 
 	rf24.setAddressWidth(CONFIG_ADDRESS_WIDTH);
-	rf24.setRetries(CONFIG_RETRY_DELAY, CONFIG_RETRY_COUNT);
 	rf24.setChannel(CONFIG_CHANNEL);
-	rf24.setPayloadSize(CONFIG_PAYLOAD_SIZE);
 	rf24.setAutoAck(true);
-	rf24.setPALevel(CONFIG_POWER);
-	rf24.setDataRate(CONFIG_BITRATE);
 	rf24.setCRCLength(RF24_CRC_8);
+
+	configureTransmitter(0);
+
 	rf24.openWritingPipe(CONFIG_ADDRESS);
 	rf24.stopListening();
 }
@@ -72,18 +73,18 @@ std::vector<std::uint64_t> Benchmark::generateRandomData() const
 	return randomData;
 }
 
-// Will make sense in the next commit
-void Benchmark::configureReceiver()
+void Benchmark::configureReceiver(int testNum)
 {
 	log("Configuring receiver...");
-	std::array<char, CONFIG_PAYLOAD_SIZE> whatever;
+
+	ConfigPayload payload = generateConfigPayload(configFromIndex(testNum));
 
 	int i;
 	for (i = 0; i < 10; i++)
 	{
-		if (rf24.write(whatever.data(), whatever.size()))
+		if (rf24.write(&payload, sizeof payload))
 		{
-			log("OK! Starting test.");
+			log("Sent");
 			break;
 		}
 		else
@@ -99,6 +100,94 @@ void Benchmark::configureReceiver()
 	}
 }
 
+void Benchmark::configureTransmitter(int config)
+{
+	currentConfig = configFromIndex(config);
+
+	ConfigPayload configPayload = generateConfigPayload(currentConfig);
+	rf24.setRetries(configPayload.retryDelay, configPayload.retryCount);
+	rf24.setPayloadSize(configPayload.payloadSize);
+	rf24.setPALevel(configPayload.power);
+	rf24.setDataRate(configPayload.bitrate);
+
+	std::vector<char> whatever(currentConfig.payloadSize);
+
+	log("Confirming receiver is accesssible...");
+
+	int i;
+	for (i = 0; i < 10; i++)
+	{
+		if (rf24.write(whatever.data(), whatever.size()))
+		{
+			log("OK.");
+			break;
+		}
+		else
+		{
+			log("Failed. Trying again...");
+		}
+	}
+
+	if (i == 10)
+	{
+		throw std::runtime_error("failed to reach receiver");
+	}
+}
+
+#define CONFIG_PAYLOAD(x)                                                                                              \
+	config.delayms = CONFIG_##x##_DELAYMS;                                                                             \
+	config.payloadSize = CONFIG_##x##_PAYLOAD_SIZE;                                                                    \
+	config.bitrate = CONFIG_##x##_BITRATE;                                                                             \
+	config.power = CONFIG_##x##_POWER;                                                                                 \
+	config.retryDelay = CONFIG_##x##_RETRY_DELAY;                                                                      \
+	config.retryCount = CONFIG_##x##_RETRY_COUNT
+
+Benchmark::Config Benchmark::configFromIndex(int configIndex)
+{
+	Config config;
+
+	switch (configIndex)
+	{
+	case 0:
+		CONFIG_PAYLOAD(INITIAL);
+		break;
+
+	case 1:
+		CONFIG_PAYLOAD(TEST1);
+		break;
+
+	case 2:
+		CONFIG_PAYLOAD(TEST2);
+		break;
+
+	case 3:
+		CONFIG_PAYLOAD(TEST3);
+		break;
+
+	case 4:
+		CONFIG_PAYLOAD(TEST4);
+		break;
+
+	default:
+		throw std::invalid_argument("config must be within [0;4]");
+	}
+
+	return config;
+}
+
+#undef CONFIG_PAYLOAD
+
+ConfigPayload Benchmark::generateConfigPayload(const Config &config)
+{
+	ConfigPayload configPayload;
+	configPayload.payloadSize = config.payloadSize - 1;
+	configPayload.bitrate = config.bitrate;
+	configPayload.power = config.power;
+	configPayload.retryDelay = config.retryDelay;
+	configPayload.retryCount = config.retryCount;
+	return configPayload;
+}
+
 void Benchmark::log(const std::string &msg) const
 {
 	if (logFn)
@@ -107,9 +196,13 @@ void Benchmark::log(const std::string &msg) const
 	}
 }
 
-std::vector<PayloadDetails> Benchmark::run()
+std::vector<PayloadDetails> Benchmark::run(int testNum)
 {
-	configureReceiver();
+	configureReceiver(testNum);
+	configureTransmitter(testNum);
+
+	log("Starting test...");
+	std::this_thread::sleep_for(1s);
 
 	std::vector<PayloadDetails> details;
 
@@ -122,12 +215,12 @@ std::vector<PayloadDetails> Benchmark::run()
 
 	unsigned long i;
 
-	if constexpr (CONFIG_DELAYMS > 0)
+	if (currentConfig.delayms > 0)
 	{
-		for (i = 0; notFinished(); i += CONFIG_PAYLOAD_SIZE)
+		for (i = 0; notFinished(); i += currentConfig.payloadSize)
 		{
 			unsigned retries = 0;
-			auto data = randomBytes.subspan(i, CONFIG_PAYLOAD_SIZE);
+			auto data = randomBytes.subspan(i, currentConfig.payloadSize);
 
 			while (notFinished())
 			{
@@ -137,23 +230,23 @@ std::vector<PayloadDetails> Benchmark::run()
 				}
 				else
 				{
-					retries += CONFIG_RETRY_COUNT;
+					retries += currentConfig.retryCount;
 				}
 			}
 
 			details.emplace_back(true, std::chrono::high_resolution_clock::now(), retries + rf24.getARC());
-			std::this_thread::sleep_for(std::chrono::milliseconds(CONFIG_DELAYMS));
+			std::this_thread::sleep_for(std::chrono::milliseconds(currentConfig.delayms));
 		}
 	}
 	else
 	{
-		for (i = 0; notFinished(); i += CONFIG_PAYLOAD_SIZE * 3)
+		for (i = 0; notFinished(); i += currentConfig.payloadSize * 3)
 		{
-			auto data = randomBytes.subspan(i, CONFIG_PAYLOAD_SIZE * 3);
+			auto data = randomBytes.subspan(i, currentConfig.payloadSize * 3);
 
-			auto data1 = data.subspan(0 * CONFIG_PAYLOAD_SIZE, CONFIG_PAYLOAD_SIZE);
-			auto data2 = data.subspan(1 * CONFIG_PAYLOAD_SIZE, CONFIG_PAYLOAD_SIZE);
-			auto data3 = data.subspan(2 * CONFIG_PAYLOAD_SIZE, CONFIG_PAYLOAD_SIZE);
+			auto data1 = data.subspan(0 * currentConfig.payloadSize, currentConfig.payloadSize);
+			auto data2 = data.subspan(1 * currentConfig.payloadSize, currentConfig.payloadSize);
+			auto data3 = data.subspan(2 * currentConfig.payloadSize, currentConfig.payloadSize);
 
 			rf24.writeFast(data1.data(), data1.size());
 			rf24.writeFast(data2.data(), data2.size());
@@ -167,7 +260,7 @@ std::vector<PayloadDetails> Benchmark::run()
 			}
 			else
 			{
-				retries = CONFIG_RETRY_COUNT;
+				retries = currentConfig.retryCount;
 			}
 
 			// Info is about 3 payloads, in this case
